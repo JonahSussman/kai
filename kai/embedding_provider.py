@@ -5,9 +5,11 @@ from enum import Enum
 import numpy
 import requests
 import tiktoken
+import torch
 from InstructorEmbedding import INSTRUCTOR
 from psycopg2 import sql
 from psycopg2.extensions import connection
+from transformers import RobertaModel, RobertaTokenizer
 
 
 class TrimStrategy(Enum):
@@ -150,6 +152,57 @@ class EmbeddingInstructor(EmbeddingProvider):
 
     def get_max_tokens(self) -> int:
         return self.max_tokens
+
+
+class EmbeddingMSCodeBERT(EmbeddingProvider):
+    """
+    https://github.com/microsoft/CodeBERT/tree/master/GraphCodeBERT/codesearch
+    """
+
+    def __init__(self):
+        # TODO: Figure out if these types are accurate
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.tokenizer: RobertaTokenizer = RobertaTokenizer.from_pretrained(
+            "microsoft/codebert-base"
+        )
+        self.model: RobertaModel = RobertaModel.from_pretrained(
+            "microsoft/codebert-base"
+        )
+        self.model.to(self.device)
+
+    def get_embedding(self, inp: str) -> list | None:
+        nl_tokens = self.tokenizer.tokenize(inp)
+        code_tokens = self.tokenizer.tokenize(inp)
+
+        tokens = (
+            [self.tokenizer.cls_token]
+            + nl_tokens
+            + [self.tokenizer.sep_token]
+            + code_tokens
+            + [self.tokenizer.eos_token]
+        )
+        tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+        context_embeddings = self.model(torch.tensor(tokens_ids)[None, :])[0]
+
+        # FIXME: Variable length embeddings?
+        return context_embeddings
+
+    def get_dimension(self) -> int:
+        return -1
+
+    def get_max_tokens(self) -> int:
+        return -1
+
+
+# if __name__ == "__main__":
+#     embp = EmbeddingMSCodeBERT()
+#     while True:
+#         inp = input("> ")
+#         emb = embp.get_embedding(inp)
+
+#         print(type(emb))
+#         print(emb.size())
+#         print(emb)
 
 
 def embedding_playground(conn: connection, embp: EmbeddingProvider) -> None:
