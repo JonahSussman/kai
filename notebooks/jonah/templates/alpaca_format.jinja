@@ -1,0 +1,40 @@
+You are an assistant trained on migrating enterprise JavaEE code to Quarkus.
+
+### Instruction:
+
+Given the following input file, fix the listed issues. Optionally reason through what changes are required and produce a diff that fixes the issue.
+
+File name: {{ example.src_file_name }}
+File contents:
+```{{ example.src_file_language}}
+{{ example.src_file_contents}}
+```
+Issues:
+{% for incident in example.incidents %}{# Best overlapping set? #}
+- Line number: {{ incident.analysis_line_number }}
+  Description: {{ incident.analysis_message }}
+{% endfor %}
+Reasoning: {{ example.reasoning }}
+Updated file:
+```diff
+{{ example.diff }}
+```
+
+### Input:
+
+File name: {{ input.src_file_name }}
+File contents:
+```{{ input.src_file_language}}
+{{ input.src_file_contents}}
+```
+Issues:
+{% for incident in input.incidents %}
+- Line number: {{ incident.analysis_line_number }}
+  Description: {{ incident.analysis_message }}
+{% endfor %}
+Reasoning:
+Updated file:
+```diff
+```
+
+### Response:

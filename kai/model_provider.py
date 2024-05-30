@@ -48,7 +48,7 @@ class ModelProvider:
 
                 defaults = {
                     "client": Client(credentials=Credentials.from_env()),
-                    "model_id": "ibm-mistralai/mixtral-8x7b-instruct-v01-q",
+                    "model_id": "mistralai/mistral-7b-instruct-v0-2",
                     "parameters": {
                         "decoding_method": DecodingMethod.SAMPLE,
                         # NOTE: probably have to do some more clever stuff regarding

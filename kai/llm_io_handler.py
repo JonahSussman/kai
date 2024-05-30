@@ -14,9 +14,9 @@ from jinja2 import (
     Template,
     TemplateNotFound,
 )
-from kai_logging import KAI_LOG
 
 from kai.constants import PATH_TEMPLATES
+from kai.kai_logging import KAI_LOG
 from kai.model_provider import ModelProvider
 from kai.models.file_solution import guess_language, parse_file_solution_content
 from kai.service.incident_store.incident_store import IncidentStore
