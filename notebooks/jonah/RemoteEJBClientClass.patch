@@ -1,0 +1,127 @@
+diff --git a/RemoteEJBClientClass.java b/RemoteRestClientClass.java
+index 684463e..333432e 100644
+--- a/RemoteEJBClientClass.java
++++ b/RemoteRestClientClass.java
+@@ -1,15 +1,13 @@
+ package org.example.ejb.remote.client;
+
+ import org.example.ejb.remote.stateful.RemotePhoneNumberGenerator;
+ import org.example.ejb.remote.stateless.RemoteNameCapitalizer;
++import io.quarkus.rest.client.RestClient;
++import io.quarkus.rest.client.inject.RegisterRestClient;
+
+ import javax.inject.Inject;
+ import javax.ws.rs.core.MediaType;
+ import java.util.logging.Logger;
+
+ public class RemoteRestClientClass {
++    @RegisterRestClient
++    NameCapitalizerClient nameCapitalizerClient;
++
++    @RegisterRestClient
++    PhoneNumberGeneratorClient phoneNumberGeneratorClient;
+
+     private static final Logger LOGGER = Logger.getLogger(RemoteRestClientClass.java.getName());
+
+     public static void main(String[] args) throws Exception {
+         // Invoke a stateless bean
+         invokeStatelessBean(&#34;john doe&#34;);
+
+         // Invoke a stateful bean
+         invokeStatefulBean();
+     }
+
+@@ -23,23 +21,15 @@ private static void invokeStatelessBean(String name) throws Exception {
+         // Lookup the remote stateless name capitalizer
+         String capitalizedName = nameCapitalizerClient.capitalizeName(name);
+         LOGGER.info(&#34;Capitalized name: &#34; + capitalizedName);
+     }
+
+-    /**
+-     * Looks up and returns the proxy to remote stateless name capitalizer bean
+-     *
+-     * @return
+-     * @throws NamingException
+-     */
+-    private static RemoteNameCapitalizer lookupRemoteStatelessNameCapitalizer() throws NamingException {
+-        final Hashtable<String, String> jndiProperties = new Hashtable<String, String>();
+-        jndiProperties.put(Context.INITIAL_CONTEXT_FACTORY, "org.wildfly.naming.client.WildFlyInitialContextFactory");
+-        jndiProperties.put(Context.PROVIDER_URL, "http://localhost:8080/wildfly-services");
+-        final Context context = new InitialContext(jndiProperties);
+-        return (RemoteNameCapitalizer) context.lookup("ejb:/ejb-remote-server-side/NameCapitalizerBean!"
+-                + RemoteNameCapitalizer.class.getName());
++    /**
++     * Invokes the name capitalizer REST client
++     */
++    private void invokeStatelessService() {
++        String name = "john doe";
++        String capitalizedName = nameCapitalizerClient.capitalizeName(name);
++        LOGGER.info(&#34;Capitalized name: &#34; + capitalizedName);
+     }
+
+     /**
+      * Looks up and returns the proxy to remote stateful phone number generator bean
+      *
+      * @return
+      * @throws NamingException
+      */
+-    private static RemotePhoneNumberGenerator lookupRemoteStatefulPhoneNumberGenerator() throws NamingException {
+-        final Hashtable<String, String> jndiProperties = new Hashtable<String, String>();
+-        jndiProperties.put(Context.INITIAL_CONTEXT_FACTORY, "org.wildfly.naming.client.WildFlyInitialContextFactory");
+-        jndiProperties.put(Context.PROVIDER_URL, "http://localhost:8080/wildfly-services");
+-        final Context context = new InitialContext(jndiProperties);
+-        return (RemotePhoneNumberGenerator) context.lookup("ejb:/ejb-remote-server-side/PhoneNumberGeneratorBean!"
+-                + RemotePhoneNumberGenerator.class.getName() + "?stateful");
++    /**
++     * Invokes the phone number generator REST client
++     */
++    private void invokeStatefulService() {
++        String phoneNumber = phoneNumberGeneratorClient.generatePhoneNumber();
++        LOGGER.info(&#34;Generated phone number: &#34; + phoneNumber);
+     }
+
+     /**
+      * Invokes the stateless and stateful services
+      */
+     private void invokeServices() throws Exception {
+         invokeStatelessService();
+         invokeStatefulService();
+     }
+
+@@ -51,15 +45,11 @@ public static void main(String[] args) throws Exception {
+         // Invoke a stateless bean
+         invokeStatelessBean(&#34;john doe&#34;);
+
+-        // Invoke a stateful bean
+-        invokeStatefulBean();
++        invokeServices();
+     }
+ }
+
+-interface RemoteNameCapitalizer {
+-    @POST
+-    @Path("/capitalizeName")
+-    @Consumes(MediaType.APPLICATION_JSON)
+-    @Produces(MediaType.APPLICATION_JSON)
+-    String capitalizeName(String name);
++class NameCapitalizerClient {
++    String capitalizeName(String name) {
++        return name.toUpperCase();
++    }
++}
+
+-interface RemotePhoneNumberGenerator {
+-    @POST
+-    @Path("/generatePhoneNumber")
+-    @Consumes(MediaType.APPLICATION_JSON)
+-    @Produces(MediaType.APPLICATION_JSON)
+-    String generatePhoneNumber();
++class PhoneNumberGeneratorClient {
++    @Inject
++    PhoneNumberGeneratorClient() {
++    }
++
++    String generatePhoneNumber() {
++        return "123-456-7890";
++    }
++}

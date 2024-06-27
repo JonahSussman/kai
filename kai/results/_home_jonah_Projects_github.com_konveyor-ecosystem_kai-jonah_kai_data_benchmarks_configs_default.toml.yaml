@@ -1,0 +1,11 @@
+- example_name: example_a
+  llm_result:
+    " Hello! It seems like you're just testing things out. That's perfectly
+    fine! I'm here to help answer any questions you might have or provide information
+    on a topic you're interested in. If you're looking for something specific, just
+    let me know and I'll do my best to assist you. In the meantime, is there anything
+    in particular you would like to know about? I can provide information on a wide
+    range of topics, including but not limited to science, technology, history, current
+    events, and more. Just let me know!"
+  prompt: This is a test lamo
+  similarity: 295.0
