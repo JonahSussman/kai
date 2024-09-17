@@ -200,7 +200,7 @@ class EnvironmentSnapshot:
 
 
 if __name__ == "__main__":
-    from cognitif.middleman.command import DEFAULT_COMMANDS
+    from playpen.repo_level_awareness.command import DEFAULT_COMMANDS
 
     parser = argparse.ArgumentParser()
 
