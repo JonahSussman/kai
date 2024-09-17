@@ -14,7 +14,7 @@ from typing import Any, Optional
 from playpen.repo_level_awareness.command_result import CommandResult
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 formatter = logging.Formatter("[%(levelname)s] %(message)s")
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)

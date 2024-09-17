@@ -11,7 +11,7 @@ from playpen.repo_level_awareness.command_result import CommandResult
 from playpen.repo_level_awareness.environment import EnvironmentSnapshot
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 formatter = logging.Formatter("[%(levelname)s] %(message)s")
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
@@ -554,6 +554,78 @@ class CommandCreate(Command):
         )
 
 
+class CommandEdit(Command):
+    name = "edit"
+    docstring = "Edits the currently opened file."
+    arguments = [
+        CommandArgument("start", int, "The start cursor position", required=True),
+        CommandArgument("end", int, "The end cursor position", required=True),
+        CommandArgument(
+            "content",
+            str,
+            "The content to replace the selected text with",
+            required=True,
+        ),
+    ]
+
+    @cached_property
+    def signature(self) -> str:
+        return "edit <start>:<end>\n<content>\nend_of_edit"
+
+    def run(self, env: EnvironmentSnapshot, cmd: str) -> EnvironmentSnapshot:
+        # cmd will look exactly like:
+        # edit <start>:<end>\n<content>\nend_of_edit
+        cmd = cmd.split(" ", 1)[1]
+
+        args = cmd.split("\n")
+        start, end = map(int, args[0].split(":"))
+        content = "\n".join(args[1:-1])
+
+        if env.opened_file is None:
+            return dataclasses.replace(
+                env,
+                spawning_result=CommandResult(
+                    cmd=args,
+                    returncode=1,
+                    stdout="",
+                    stderr="No file is currently open.",
+                ),
+            )
+
+        with open(env.opened_file, "r") as f:
+            lines = f.readlines()
+
+        if start < 1 or end > len(lines):
+            return dataclasses.replace(
+                env,
+                spawning_result=CommandResult(
+                    cmd=args,
+                    returncode=1,
+                    stdout="",
+                    stderr="Invalid cursor positions.",
+                ),
+            )
+
+        lines[start - 1 : end] = content.split("\n")
+
+        with open(env.opened_file, "w") as f:
+            f.writelines(lines)
+
+        output, cursor_start, cursor_end = print_file_contents(env, env.opened_file)
+
+        return dataclasses.replace(
+            env,
+            spawning_result=CommandResult(
+                cmd=args,
+                returncode=0,
+                stdout=output,
+                stderr="",
+            ),
+            cursor_start=cursor_start,
+            cursor_end=cursor_end,
+        )
+
+
 # --- Task ---
 
 AGENT_COMMANDS: list[Command] = [
@@ -561,6 +633,7 @@ AGENT_COMMANDS: list[Command] = [
     CommandSetCursor(),
     CommandGoto(),
     CommandCreate(),
+    CommandEdit(),
     CommandSetCursor(),
 ]
 
