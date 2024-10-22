@@ -1,7 +1,7 @@
 import os
 import tomllib
 from enum import StrEnum
-from typing import Any, Literal, Optional, Self, Union
+from typing import Any, Callable, Literal, Optional, Self, Union
 
 import yaml
 from pydantic import BaseModel, Field, model_validator
@@ -151,7 +151,7 @@ class KaiConfigIncidentStore(BaseModel):
 
 class KaiConfigModels(BaseModel):
     provider: str
-    args: dict[str, Any] = Field(default_factory=dict)
+    args: dict = Field(default_factory=dict)
     template: Optional[str] = Field(default=None)
     llama_header: Optional[bool] = Field(default=None)
     llm_retries: int = 5
@@ -205,6 +205,9 @@ class TomlConfigSettingsSource(PydanticBaseSettingsSource):
         return d
 
 
+KAI_CONFIG_PATH: str | None = None
+
+
 class KaiConfig(BaseSettings):
     """
     Kai configuration settings. It loads settings from init arguments,
@@ -252,18 +255,25 @@ class KaiConfig(BaseSettings):
         - Global config file (kai.config.toml)
         - Default field values
         """
-        return (
-            init_settings,
-            env_settings,
-            dotenv_settings,
-            file_secret_settings,
-            TomlConfigSettingsSource(
-                settings_cls, os.path.join(PATH_KAI, "config.toml")
-            ),
-        )
+
+        if KAI_CONFIG_PATH is not None:
+            return (
+                init_settings,
+                env_settings,
+                dotenv_settings,
+                TomlConfigSettingsSource(settings_cls, KAI_CONFIG_PATH),
+                file_secret_settings,
+            )
+        else:
+            return (
+                init_settings,
+                env_settings,
+                dotenv_settings,
+                file_secret_settings,
+            )
 
     @staticmethod
-    def model_validate_filepath(filepath: str) -> "KaiConfig":
+    def model_validate_filepath(filepath: str):
         """
         Load a model config from a file and validate it.
 
@@ -271,7 +281,7 @@ class KaiConfig(BaseSettings):
         - TOML
         - YAML
         """
-        model_dict: dict[str, Any]
+        model_dict: dict
 
         _, file_ext = os.path.splitext(filepath)
 
@@ -283,3 +293,26 @@ class KaiConfig(BaseSettings):
             raise ValueError(f"'{filepath}' has unsupported file type: {file_ext}")
 
         return KaiConfig(**model_dict)
+
+
+# def __exception_func(msg: str) -> Any:
+#     def inner(*args: Any, **kwargs: Any) -> Any:
+#         raise Exception(msg)
+
+#     return inner
+
+# __orig_kai_config_init = KaiConfig.__init__
+# KaiConfig.__init__ = __exception_func("KaiConfig.__init__ called")
+
+# __orig_settings_model_validate = KaiConfig.model_validate
+# KaiConfig.model_validate = __exception_func("Settings.model_validate called")
+# __orig_settings_model_validate_json = KaiConfig.model_validate_json
+# KaiConfig.model_validate_json = __exception_func("Settings.model_validate_json called")
+# __orig_settings_model_validate_strings = KaiConfig.model_validate_strings
+# KaiConfig.model_validate_strings = __exception_func("Settings.model_validate_strings called")
+# __orig_settings_customise_sources = KaiConfig.settings_customise_sources
+# KaiConfig.settings_customise_sources = __exception_func("Settings.settings_customise_sources called")
+
+
+# class SafeKaiConfig(KaiConfig):
+#     pass
