@@ -1,0 +1,28 @@
+- category: mandatory
+  customVariables: []
+  description: The application uses Java APIs to read/write from the file system
+  effort: 5
+  labels: []
+  links:
+  # - title: Java APIs found in the application to read/write from the file system
+  #   url: https://learn.microsoft.com/azure/developer/java/migration/migrate-spring-cloud-to-azure-spring-apps?pivots=sc-standard-tier#determine-whether-and-how-the-file-system-is-used
+  # - title: Azure Spring Boot Starter for Azure Storage
+  #   url: https://search.maven.org/artifact/com.azure.spring/azure-spring-boot-starter-storage
+  message: Nothing to be done!
+  ruleID: tree-sitter-rule-00001
+  when:
+    tree_sitter.query:
+      language: java
+      query: |
+        (method_declaration
+          name: (identifier) @function-name
+          (#match? @function-name "^get"))
+    # or:
+    # - java.referenced:
+    #     pattern: java.io.(File|FileWriter|FileReader|FileInputStream|FileOutputStream)
+    # - java.referenced:
+    #     location: PACKAGE
+    #     pattern: java.nio*
+    # - java.referenced:
+    #     location: PACKAGE
+    #     pattern: org.apache.commons.io*

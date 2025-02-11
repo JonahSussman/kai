@@ -72,9 +72,52 @@ func NewAnalyzer(limitIncidents, limitCodeSnips, contextLines int, location, inc
 		return nil, err
 	}
 
+	// treeSitterConfig := provider.Config{
+	// 	Name:       "tree_sitter",
+	// 	BinaryPath: "/home/jonah/Projects/github.com/JonahSussman/analyzer-lsp/external-providers/generic-external-provider/generic-external-provider",
+	// 	InitConfig: []provider.InitConfig{
+	// 		{
+	// 			Location:     location,
+	// 			AnalysisMode: "full",
+	// 			ProviderSpecificConfig: map[string]interface{}{
+	// 				"name": "tree_sitter",
+	// 			},
+	// 		},
+	// 	},
+	// }
+
+	treeSitterConfig := provider.Config{
+		Name:       "tree_sitter",
+		BinaryPath: "/home/jonah/Projects/github.com/JonahSussman/analyzer-lsp/external-providers/generic-external-provider/generic-external-provider",
+		InitConfig: []provider.InitConfig{
+			{
+				Location:     location,
+				AnalysisMode: "full",
+				Proxy:        &provider.Proxy{},
+				ProviderSpecificConfig: map[string]interface{}{
+					"name":          "tree_sitter",
+					"lspServerName": "tree_sitter",
+				},
+			},
+		},
+	}
+
+	treeSitterProvider, err := lib.GetProviderClient(treeSitterConfig, log)
+	if err != nil {
+		cancelFunc()
+		return nil, err
+	}
+
+	_, err = treeSitterProvider.ProviderInit(context.Background(), treeSitterConfig.InitConfig)
+	if err != nil {
+		cancelFunc()
+		return nil, err
+	}
+
 	providers := map[string]provider.InternalProviderClient{
-		"java":    jProvider,
-		"builtin": bProvider,
+		"java":        jProvider,
+		"builtin":     bProvider,
+		"tree_sitter": treeSitterProvider,
 	}
 
 	parser := parser.RuleParser{

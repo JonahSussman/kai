@@ -1,0 +1,211 @@
+error: null
+id: 0
+jsonrpc: "2.0"
+result:
+  Rulesets:
+    - name: tree-sitter-rules
+      violations:
+        tree-sitter-rule-00001:
+          category: mandatory
+          description: The application uses Java APIs to read/write from the file system
+          incidents:
+            - codeSnip:
+                " 8  \n 9  \tprivate double price;\n10  \tprivate int quantity;\n\
+                11  \tprivate double promoSavings;\n12  \tprivate Product product;\n13\
+                \  \t\n14  \tpublic ShoppingCartItem() {\n15  \t\t\n16  \t}\n17  \t\n\
+                18  \tpublic double getPrice() {\n19  \t\treturn price;\n20  \t}\n21 \
+                \ \n22  \tpublic void setPrice(double price) {\n23  \t\tthis.price = price;\n\
+                24  \t}\n25  \n26  \tpublic Product getProduct() {\n27  \t\treturn product;\n\
+                28  \t}"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/ShoppingCartItem.java
+            - codeSnip:
+                "28  \n29  \n30      @GET\n31      @Path(\"/\")\n32      public\
+                \ List<Order> listAll() {\n33          return os.getOrders();\n34    \
+                \  }\n35  \n36      @GET\n37      @Path(\"/{orderId}\")\n38      public\
+                \ Order getOrder(@PathParam(\"orderId\") long orderId) {\n39         \
+                \ return os.getOrderById(orderId);\n40      }\n41  \n42  }\n"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/rest/OrderEndpoint.java
+            - codeSnip:
+                "19  \n20      @Inject\n21      Logger log;\n22  \n23      @Inject\n\
+                24      private EntityManager em;\n25  \n26      public CatalogService()\
+                \ {\n27      }\n28  \n29      public List<CatalogItemEntity> getCatalogItems()\
+                \ {\n30          CriteriaBuilder cb = em.getCriteriaBuilder();\n31   \
+                \       CriteriaQuery<CatalogItemEntity> criteria = cb.createQuery(CatalogItemEntity.class);\n\
+                32          Root<CatalogItemEntity> member = criteria.from(CatalogItemEntity.class);\n\
+                33          criteria.select(member);\n34          return em.createQuery(criteria).getResultList();\n\
+                35      }\n36  \n37      public CatalogItemEntity getCatalogItemById(String\
+                \ itemId) {\n38          return em.find(CatalogItemEntity.class, itemId);\n\
+                39      }"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/service/CatalogService.java
+            - codeSnip:
+                "13  \n14  @Stateless\n15  public class ProductService {\n16 \
+                \ \n17      @Inject\n18      CatalogService cm;\n19  \n20      public\
+                \ ProductService() {\n21      }\n22  \n23      public List<Product> getProducts()\
+                \ {\n24          return cm.getCatalogItems().stream().map(entity -> toProduct(entity)).collect(Collectors.toList());\n\
+                25      }\n26  \n27      public Product getProductByItemId(String itemId)\
+                \ {\n28          CatalogItemEntity entity = cm.getCatalogItemById(itemId);\n\
+                29          if (entity == null)\n30              return null;\n31  \n\
+                32          // Return the entity\n33          return Transformers.toProduct(entity);"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/service/ProductService.java
+            - codeSnip:
+                "70  \n71                  return getPercentOfTotal(sc.getCartItemTotal(),\
+                \ 0.01);\n72  \n73              }\n74  \n75          }\n76  \n77     \
+                \     return 0;\n78      }\n79  \n80      private static double getPercentOfTotal(double\
+                \ value, double percentOfTotal) {\n81          return BigDecimal.valueOf(value\
+                \ * percentOfTotal)\n82                  .setScale(2, RoundingMode.HALF_UP)\n\
+                83                  .doubleValue();\n84      }\n85  \n86  }\n"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/service/ShippingService.java
+            - codeSnip:
+                "29      @Inject\n30      ShoppingCartOrderProcessor shoppingCartOrderProcessor;\n\
+                31  \n32      private ShoppingCart cart  = new ShoppingCart(); //Each\
+                \ user can have multiple shopping carts (tabbed browsing)\n33  \n34  \
+                \   \n35  \n36      public ShoppingCartService() {\n37      }\n38  \n\
+                39      public ShoppingCart getShoppingCart(String cartId) {\n40     \
+                \     return cart;\n41      }\n42  \n43      public ShoppingCart checkOutShoppingCart(String\
+                \ cartId) {\n44          ShoppingCart cart = this.getShoppingCart(cartId);\n\
+                45        \n46          log.info(\"Sending  order: \");\n47          shoppingCartOrderProcessor.process(cart);\n\
+                48     \n49          cart.resetShoppingCartItemList();"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/service/ShoppingCartService.java
+            - codeSnip:
+                " 9  \tpublic Promotion() {\n10  \t\t\n11  \t}\n12  \t\n13  \t\
+                public Promotion(String itemId, double percentOff) {\n14  \t\tsuper();\n\
+                15  \t\tthis.itemId = itemId;\n16  \t\tthis.percentOff = percentOff;\n\
+                17  \t}\n18  \n19  \tpublic String getItemId() {\n20  \t\treturn itemId;\n\
+                21  \t}\n22  \n23  \tpublic void setItemId(String itemId) {\n24  \t\t\
+                this.itemId = itemId;\n25  \t}\n26  \n27  \tpublic double getPercentOff()\
+                \ {\n28  \t\treturn percentOff;\n29  \t}"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/Promotion.java
+            - codeSnip:
+                "62          tsubscriber.setMessageListener(this);\n63       \
+                \   tcon.start();\n64      }\n65  \n66      public void close() throws\
+                \ JMSException {\n67          tsubscriber.close();\n68          tsession.close();\n\
+                69          tcon.close();\n70      }\n71  \n72      private static InitialContext\
+                \ getInitialContext() throws NamingException {\n73          Hashtable<String,\
+                \ String> env = new Hashtable<>();\n74          env.put(Context.INITIAL_CONTEXT_FACTORY,\
+                \ JNDI_FACTORY);\n75          env.put(Context.PROVIDER_URL, \"t3://localhost:7001\"\
+                );\n76          env.put(\"weblogic.jndi.createIntermediateContexts\",\
+                \ \"true\");\n77          return new InitialContext(env);\n78      }\n\
+                79  }\n"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/service/InventoryNotificationMDB.java
+            - codeSnip:
+                "69  \n70                  shoppingCart.setShippingPromoSavings(shoppingCart.getShippingTotal()\
+                \ * -1);\n71                  shoppingCart.setShippingTotal(0);\n72  \n\
+                73              }\n74  \n75          }\n76  \n77      }\n78  \n79    \
+                \  public Set<Promotion> getPromotions() {\n80  \n81          if (promotionSet\
+                \ == null) {\n82  \n83              promotionSet = new HashSet<>();\n\
+                84  \n85          }\n86  \n87          return new HashSet<>(promotionSet);\n\
+                88  \n89      }"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/service/PromoService.java
+            - codeSnip:
+                "40  \n41  \t@Column(name=\"TOTAL_PRICE\")\n42  \n43  \t\n44 \
+                \ \t@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval\
+                \ = true)\n45  \t@JoinColumn(name=\"ORDER_ID\")\n46  \tprivate List<OrderItem>\
+                \ itemList = new ArrayList<>();\n47  \n48  \tpublic Order() {}\n49  \n\
+                50  \tpublic long getOrderId() {\n51  \t\treturn orderId;\n52  \t}\n53\
+                \  \n54  \tpublic void setOrderId(long orderId) {\n55  \t\tthis.orderId\
+                \ = orderId;\n56  \t}\n57  \n58  \tpublic String getCustomerName() {\n\
+                59  \t\treturn customerName;\n60  \t}"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/Order.java
+            - codeSnip:
+                "20  \tprivate double shippingPromoSavings;\n21  \t\n22  \tprivate\
+                \ double cartTotal;\n23  \t\t\t\n24  \tprivate List<ShoppingCartItem>\
+                \ shoppingCartItemList = new ArrayList<ShoppingCartItem>();\n25  \n26\
+                \  \tpublic ShoppingCart() {\n27  \t\t\n28  \t}\n29  \t\n30  \tpublic\
+                \ List<ShoppingCartItem> getShoppingCartItemList() {\n31  \t\treturn shoppingCartItemList;\n\
+                32  \t}\n33  \n34  \tpublic void setShoppingCartItemList(List<ShoppingCartItem>\
+                \ shoppingCartItemList) {\n35  \t\tthis.shoppingCartItemList = shoppingCartItemList;\n\
+                36  \t}\n37  \n38  \tpublic void resetShoppingCartItemList() {\n39  \t\
+                \tshoppingCartItemList = new ArrayList<ShoppingCartItem>();\n40  \t}"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/ShoppingCart.java
+            - codeSnip:
+                "27  \n28  \n29      @GET\n30      @Path(\"/\")\n31      public\
+                \ List<Product> listAll() {\n32          return pm.getProducts();\n33\
+                \      }\n34  \n35      @GET\n36      @Path(\"/{itemId}\")\n37      public\
+                \ Product getProduct(@PathParam(\"itemId\") String itemId) {\n38     \
+                \     return pm.getProductByItemId(itemId);\n39      }\n40  \n41  }\n"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/rest/ProductEndpoint.java
+            - codeSnip:
+                "12  @Stateless\n13  public class OrderService {\n14  \n15   \
+                \ @Inject\n16    private EntityManager em;\n17  \n18    public void save(Order\
+                \ order) {\n19      em.persist(order);\n20    }\n21  \n22    public List<Order>\
+                \ getOrders() {\n23      CriteriaBuilder cb = em.getCriteriaBuilder();\n\
+                24      CriteriaQuery<Order> criteria = cb.createQuery(Order.class);\n\
+                25      Root<Order> member = criteria.from(Order.class);\n26      criteria.select(member);\n\
+                27      return em.createQuery(criteria).getResultList();\n28    }\n29\
+                \  \n30    public Order getOrderById(long id) {\n31      return em.find(Order.class,\
+                \ id);\n32    }"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/service/OrderService.java
+            - codeSnip:
+                "21      @Column\n22  \tprivate double price;\n23  \n24  \t@OneToOne(cascade\
+                \ = CascadeType.ALL,fetch=FetchType.EAGER)\n25      @PrimaryKeyJoinColumn\n\
+                26  \tprivate InventoryEntity inventory;\n27  \n28  \tpublic CatalogItemEntity()\
+                \ {\n29  \t}\n30  \n31  \tpublic String getItemId() {\n32  \t\treturn\
+                \ itemId;\n33  \t}\n34  \n35  \tpublic void setItemId(String itemId) {\n\
+                36  \t\tthis.itemId = itemId;\n37  \t}\n38  \n39  \tpublic String getName()\
+                \ {\n40  \t\treturn name;\n41  \t}"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/CatalogItemEntity.java
+            - codeSnip:
+                "28      private int quantity;\n29  \n30  \n31      @Column\n\
+                32      private String link;\n33  \n34      public InventoryEntity() {\n\
+                35  \n36      }\n37  \n38      public String getItemId() {\n39  \t\treturn\
+                \ itemId;\n40  \t}\n41  \n42  \tpublic void setItemId(String itemId) {\n\
+                43  \t\tthis.itemId = itemId;\n44  \t}\n45  \n46  \tpublic String getLocation()\
+                \ {\n47  \t\treturn location;\n48  \t}"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/InventoryEntity.java
+            - codeSnip:
+                "17  \t@Column(name=\"ID\")\n18  \t@GeneratedValue\n19  \tprivate\
+                \ long id;\n20  \n21  \tprivate int quantity;\n22  \n23  \tprivate String\
+                \ productId;\n24  \n25  \tpublic OrderItem() {}\n26  \n27  \tpublic String\
+                \ getProductId() {\n28  \t\treturn productId;\n29  \t}\n30  \n31  \tpublic\
+                \ void setProductId(String productId) {\n32  \t\tthis.productId = productId;\n\
+                33  \t}\n34  \n35  \tpublic int getQuantity() {\n36  \t\treturn quantity;\n\
+                37  \t}"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/OrderItem.java
+            - codeSnip:
+                "17      private String location;\n18  \n19      private int quantity;\n\
+                20  \n21      private String link;\n22  \n23  \n24      public Product()\
+                \ {\n25      }\n26  \n27      public String getItemId() {\n28        \
+                \  return itemId;\n29      }\n30  \n31      public void setItemId(String\
+                \ itemId) {\n32          this.itemId = itemId;\n33      }\n34  \n35  \
+                \    public String getName() {\n36          return name;\n37      }"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/model/Product.java
+            - codeSnip:
+                " 5  import javax.persistence.EntityManager;\n 6  import javax.persistence.PersistenceContext;\n\
+                \ 7  \n 8  @Dependent\n 9  public class Resources {\n10  \n11      @PersistenceContext\n\
+                12      private EntityManager em;\n13  \n14      @Produces\n15      public\
+                \ EntityManager getEntityManager() {\n16          return em;\n17     \
+                \ }\n18  }\n"
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/persistence/Resources.java
+            - codeSnip:
+                "26  public class CartEndpoint implements Serializable {\n27 \
+                \ \n28  \tprivate static final long serialVersionUID = -7227732980791688773L;\n\
+                29  \n30  \t@Inject\n31  \tprivate ShoppingCartService shoppingCartService;\n\
+                32  \n33  \t@GET\n34  \t@Path(\"/{cartId}\")\n35  \t@Produces(MediaType.APPLICATION_JSON)\n\
+                36  \tpublic ShoppingCart getCart(@PathParam(\"cartId\") String cartId)\
+                \ {\n37  \t\treturn shoppingCartService.getShoppingCart(cartId);\n38 \
+                \ \t}\n39  \n40  \t@POST\n41  \t@Path(\"/checkout/{cartId}\")\n42  \t\
+                @Produces(MediaType.APPLICATION_JSON)\n43  \tpublic ShoppingCart checkout(@PathParam(\"\
+                cartId\") String cartId) {\n44  \t\treturn shoppingCartService.checkOutShoppingCart(cartId);\n\
+                45  \t}\n46  "
+              message: Nothing to be done!
+              uri: file:///home/jonah/Projects/github.com/konveyor-ecosystem/coolstore/src/main/java/com/redhat/coolstore/rest/CartEndpoint.java
+          labels:
+            - tree-sitter

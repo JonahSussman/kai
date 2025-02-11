@@ -1,5 +1,6 @@
 import logging
 import os
+import signal
 import subprocess  # trunk-ignore(bandit/B404)
 import threading
 from io import BufferedReader, BufferedWriter
@@ -74,6 +75,13 @@ class AnalyzerLSP:
             if self.rpc_server.poll() is not None:
                 self.stop()
                 raise Exception("Analyzer failed to start: process exited immediately")
+
+            os.kill(self.rpc_server.pid, signal.SIGSTOP)
+            print(f"analyzer pid: {self.rpc_server.pid}")
+            input("Press ENTER to continue...")
+            os.kill(self.rpc_server.pid, signal.SIGCONT)
+
+            logger.info(f"analyzer rpc server started. pid: {self.rpc_server.pid}")
 
             # trunk-ignore-end(bandit/B603)
             self.excluded_paths = excluded_paths
