@@ -147,3 +147,9 @@ upperbound
 venv
 webassets
 webmvc
+SHFT
+httpsnoop
+felixge
+cenkalti
+tmpl
+sdktrace
